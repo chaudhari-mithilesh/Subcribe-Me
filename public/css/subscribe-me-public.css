@@ -2,3 +2,45 @@
  * All of the CSS for your public-facing functionality should be
  * included in this file.
  */
+
+.subscribe-me-form {
+  /* background-color: black; */
+  /* color: blanchedalmond; */
+  /* border: dashed black 5px; */
+  /* background-color: white; */
+  display: flex;
+  flex-direction: column;
+  /* padding: 10px; */
+}
+
+.subscribe-me-form legend {
+  text-align: center;
+  font-size: 42px;
+  width: fit-content;
+  align-self: center;
+}
+
+.subscribe-me-form label {
+  text-align: center;
+}
+
+.subscribe-me-form input {
+  width: min-content;
+  align-self: center;
+  line-height: 1.7rem;
+  border: solid black 2px;
+  border-radius: 5px;
+}
+
+.subscribe-me-form input[type="submit"] {
+  margin-top: 10px;
+  padding: 10px 30px;
+  border: solid black 1px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.subscribe-me-form input[type="submit"]:hover {
+  background-color: green;
+  color: white;
+}
