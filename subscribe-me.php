@@ -26,7 +26,7 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
+if (!defined('WPINC')) {
 	die;
 }
 
@@ -35,14 +35,15 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'SUBSCRIBE_ME_VERSION', '1.0.0' );
+define('SUBSCRIBE_ME_VERSION', '1.0.0');
 
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-subscribe-me-activator.php
  */
-function activate_subscribe_me() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-subscribe-me-activator.php';
+function activate_subscribe_me()
+{
+	require_once plugin_dir_path(__FILE__) . 'includes/class-subscribe-me-activator.php';
 	Subscribe_Me_Activator::activate();
 }
 
@@ -50,19 +51,20 @@ function activate_subscribe_me() {
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-subscribe-me-deactivator.php
  */
-function deactivate_subscribe_me() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-subscribe-me-deactivator.php';
+function deactivate_subscribe_me()
+{
+	require_once plugin_dir_path(__FILE__) . 'includes/class-subscribe-me-deactivator.php';
 	Subscribe_Me_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_subscribe_me' );
-register_deactivation_hook( __FILE__, 'deactivate_subscribe_me' );
+register_activation_hook(__FILE__, 'activate_subscribe_me');
+register_deactivation_hook(__FILE__, 'deactivate_subscribe_me');
 
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-subscribe-me.php';
+require plugin_dir_path(__FILE__) . 'includes/class-subscribe-me.php';
 
 /**
  * Begins execution of the plugin.
@@ -73,10 +75,34 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-subscribe-me.php';
  *
  * @since    1.0.0
  */
-function run_subscribe_me() {
+
+// $CUSTOM
+
+// Add a shortcode to display the form
+function subscribe_me__shortcode()
+{
+	// Code to generate the form HTML goes here
+	$form_html = '<form class="subscribe-me-form" method="post">
+                      <legend>Subscribe to Newsletter</legend>
+                      <label for="name">Name</label>
+                      <input type="text" id="name" name="name">
+                      <br>
+                      <label for="email">Email</label>
+                      <input type="email" id="email" name="email">
+                      <br>
+                      <input class="btn" type="submit" value="Submit">
+                  </form>';
+
+	// Return the form HTML
+	return $form_html;
+}
+
+add_shortcode('subscribe-me', 'subscribe_me__shortcode');
+
+function run_subscribe_me()
+{
 
 	$plugin = new Subscribe_Me();
 	$plugin->run();
-
 }
 run_subscribe_me();
