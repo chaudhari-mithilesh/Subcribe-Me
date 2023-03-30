@@ -16,17 +16,22 @@
 }
 
 .sm-table {
+  border-collapse: collapse;
   text-align: center;
-  /* border: solid black 5px; */
   table-layout: inherit;
 }
 
-.sm-table thead {
-  height: 25px;
-  width: max-content;
-  /* background-color: black; */
+.sm-table th {
+  background-color: #222222;
+  color: white;
 }
 
-.sm-table th {
-  padding: 0px 15px;
+.sm-table th,
+.sm-table td {
+  padding: 8px;
+  font-size: 18px;
+}
+
+.sm-table tr {
+  border-bottom: 1px solid #222;
 }
