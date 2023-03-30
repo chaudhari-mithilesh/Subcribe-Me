@@ -20,7 +20,8 @@
  * @subpackage Subscribe_Me/public
  * @author     Mithilesh <mithilesh.chaudhaudhari@wisdmlabs.com>
  */
-class Subscribe_Me_Public {
+class Subscribe_Me_Public
+{
 
 	/**
 	 * The ID of this plugin.
@@ -47,11 +48,11 @@ class Subscribe_Me_Public {
 	 * @param      string    $plugin_name       The name of the plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct($plugin_name, $version)
+	{
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
 
 	/**
@@ -59,7 +60,8 @@ class Subscribe_Me_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_styles() {
+	public function enqueue_styles()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -73,8 +75,7 @@ class Subscribe_Me_Public {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/subscribe-me-public.css', array(), $this->version, 'all' );
-
+		wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/subscribe-me-public.css', array(), $this->version, 'all');
 	}
 
 	/**
@@ -82,7 +83,8 @@ class Subscribe_Me_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -96,8 +98,147 @@ class Subscribe_Me_Public {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/subscribe-me-public.js', array( 'jquery' ), $this->version, false );
-
+		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/subscribe-me-public.js', array('jquery'), $this->version, false);
 	}
 
+	// $CUSTOM
+	// Add a shortcode to display the form
+
+	function call_shortcode()
+	{
+		add_shortcode('subscribe-me', array($this, 'subscribe_me__shortcode'));
+	}
+
+	function subscribe_me__shortcode()
+	{
+		// Code to generate the form HTML goes here
+		$form_html = '<form class="subscribe-me-form" method="post">
+                      <legend>Subscribe to Newsletter</legend>
+					  <input type="hidden" name="action" value="subs_form">
+                      <label for="email">Email</label>
+                      <input type="email" id="email" name="email">
+                      <br>
+                      <input type="submit" name="submit" id="subscribe-button" value="Subscribe"/>
+                  </form>';
+
+
+
+		// Return the form HTML
+		return $form_html;
+	}
+
+	// Save subscriber email to database
+	function register_subscriber()
+	{
+		//To check input pattern 
+		if (isset($_POST['email'])) {
+			$email = sanitize_email($_POST['email']);
+			$pattern = '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/';
+
+			if (preg_match($pattern, $email)) {
+				if (isset($_POST['submit'])) {
+
+					$my_sub_email = get_option('my_sub_email');
+
+					if (!$my_sub_email) {
+						$my_sub_email = array();
+					}
+
+					if (in_array($email, $my_sub_email)) {
+						echo '<script>alert("You are already subscribed!");</script>';
+					} else {
+						$my_sub_email[] = $email;
+						update_option('my_sub_email', $my_sub_email);
+
+						// Display a success message
+						echo '<script>alert("You have been subscribed Successfully!");</script>';
+					}
+				}
+			} else {
+				//For invalid email
+				echo '<script>alert("Please Enter a valid email!");</script>';
+			}
+		}
+	}
+
+
+	function send_mail()
+	{
+		$to = implode(',', get_option('my_sub_email'));
+		$subject = 'Successfully subscribed to ' . the_title() . ' newsletter';
+		$summary = $this->get_daily_post_details();
+		$message = 'You will get our daily feeds right into your inbox. Enjoy!!!';
+		$message .= "\n\n";
+		$message .= "Here are our Top latest Posts";
+		$message .= "\n";
+
+		foreach ($summary as $post_data) {
+			$message .= 'Title: ' . $post_data['title'] . "\n";
+			$message .= 'URL: ' . $post_data['url'] . "\n";
+			$message .= "\n";
+		}
+
+		$headers = array(
+			'From: dev-email@wpengine.local',
+			'Content-Type: text/html; charset=UTF-8'
+		);
+
+		wp_mail($to, $subject, $message, $headers);
+	}
+
+	function get_daily_post_details()
+	{
+		//To send latest n posts 
+		$args = array(
+			'post_type' => 'post',
+			'posts_per_page' => get_option('no_of_posts'),
+			'post_status' => 'publish'
+		);
+
+		$query = new WP_Query($args);
+		$posts = $query->posts;
+		$mail_list = array();
+
+		foreach ($posts as $post) {
+			$post_data = array(
+				'title' => $post->post_title,
+				'url' => get_permalink($post->ID),
+			);
+			array_push($mail_list, $post_data);
+		}
+		return $mail_list;
+	}
+
+
+	// Cron scheduling and mail scheduling
+
+	function my_cron_schedules($schedules)
+	{
+		if (!isset($schedules["1min"])) {
+			$schedules["1min"] = array(
+				'interval' => 60,
+				'display' => __('Once every minutes')
+			);
+		}
+
+		if (!isset($schedules["2min"])) {
+			$schedules["2min"] = array(
+				'interval' => 2 * 60,
+				'display' => __('Once every 2 minutes')
+			);
+		}
+
+		return $schedules;
+	}
+
+	// this function decides the timings of the mail
+	// here you can Test the mail.
+	function schedule_email()
+	{
+		if (!wp_next_scheduled('send_email_cron_hook')) {
+			// Convert the time to the UTC timestamp
+			$timestamp = strtotime('6:30pm GMT+5:30');
+			wp_schedule_event(time(), '1min', 'send_email_cron_hook');
+		}
+	}
 }
