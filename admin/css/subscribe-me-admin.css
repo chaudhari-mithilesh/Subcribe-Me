@@ -2,3 +2,31 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+
+.form-container div {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.my-plugin-title {
+  text-align: center;
+  width: 100%;
+}
+
+.sm-table {
+  text-align: center;
+  /* border: solid black 5px; */
+  table-layout: inherit;
+}
+
+.sm-table thead {
+  height: 25px;
+  width: max-content;
+  /* background-color: black; */
+}
+
+.sm-table th {
+  padding: 0px 15px;
+}
