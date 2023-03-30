@@ -238,7 +238,7 @@ class Subscribe_Me_Public
 		if (!wp_next_scheduled('send_email_cron_hook')) {
 			// Convert the time to the UTC timestamp
 			$timestamp = strtotime('6:30pm GMT+5:30');
-			wp_schedule_event(time(), '1min', 'send_email_cron_hook');
+			wp_schedule_event($timestamp, 'daily', 'send_email_cron_hook');
 		}
 	}
 }
