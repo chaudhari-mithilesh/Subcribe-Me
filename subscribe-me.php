@@ -76,28 +76,14 @@ require plugin_dir_path(__FILE__) . 'includes/class-subscribe-me.php';
  * @since    1.0.0
  */
 
-// $CUSTOM
+//  $CUSTOM
+// remove schedule when deactivating plugin
 
-// Add a shortcode to display the form
-function subscribe_me__shortcode()
+function remove_schedule()
 {
-	// Code to generate the form HTML goes here
-	$form_html = '<form class="subscribe-me-form" method="post">
-                      <legend>Subscribe to Newsletter</legend>
-                      <label for="name">Name</label>
-                      <input type="text" id="name" name="name">
-                      <br>
-                      <label for="email">Email</label>
-                      <input type="email" id="email" name="email">
-                      <br>
-                      <input class="btn" type="submit" value="Submit">
-                  </form>';
-
-	// Return the form HTML
-	return $form_html;
+	wp_clear_scheduled_hook('sendemail');
 }
-
-add_shortcode('subscribe-me', 'subscribe_me__shortcode');
+register_deactivation_hook(__FILE__, 'remove_schedule');
 
 function run_subscribe_me()
 {
