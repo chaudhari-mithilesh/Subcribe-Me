@@ -27,7 +27,8 @@
  * @subpackage Subscribe_Me/includes
  * @author     Mithilesh <mithilesh.chaudhaudhari@wisdmlabs.com>
  */
-class Subscribe_Me {
+class Subscribe_Me
+{
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -66,8 +67,9 @@ class Subscribe_Me {
 	 *
 	 * @since    1.0.0
 	 */
-	public function __construct() {
-		if ( defined( 'SUBSCRIBE_ME_VERSION' ) ) {
+	public function __construct()
+	{
+		if (defined('SUBSCRIBE_ME_VERSION')) {
 			$this->version = SUBSCRIBE_ME_VERSION;
 		} else {
 			$this->version = '1.0.0';
@@ -78,7 +80,6 @@ class Subscribe_Me {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
-
 	}
 
 	/**
@@ -97,33 +98,33 @@ class Subscribe_Me {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function load_dependencies() {
+	private function load_dependencies()
+	{
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-subscribe-me-loader.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-subscribe-me-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-subscribe-me-i18n.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-subscribe-me-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-subscribe-me-admin.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-subscribe-me-admin.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-subscribe-me-public.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-subscribe-me-public.php';
 
 		$this->loader = new Subscribe_Me_Loader();
-
 	}
 
 	/**
@@ -135,12 +136,12 @@ class Subscribe_Me {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function set_locale() {
+	private function set_locale()
+	{
 
 		$plugin_i18n = new Subscribe_Me_i18n();
 
-		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-
+		$this->loader->add_action('plugins_loaded', $plugin_i18n, 'load_plugin_textdomain');
 	}
 
 	/**
@@ -150,13 +151,20 @@ class Subscribe_Me {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_admin_hooks() {
+	private function define_admin_hooks()
+	{
 
-		$plugin_admin = new Subscribe_Me_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Subscribe_Me_Admin($this->get_plugin_name(), $this->get_version());
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
+		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
 
+		// $CUSTOM
+		// Menu page in admin Menu
+		$this->loader->add_action('admin_menu', $plugin_admin, 'subscribe_me_menu_page');
+
+		// settings fields of submenu page settings
+		$this->loader->add_action('admin_init', $plugin_admin, 'reg_settings');
 	}
 
 	/**
@@ -166,13 +174,24 @@ class Subscribe_Me {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_public_hooks() {
+	private function define_public_hooks()
+	{
 
-		$plugin_public = new Subscribe_Me_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Subscribe_Me_Public($this->get_plugin_name(), $this->get_version());
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
 
+		// $CUSTOM
+		//To define shortcode
+		$this->loader->add_action('init', $plugin_public, 'call_shortcode');
+
+		//To add subscriber to the database
+		$this->loader->add_action('init', $plugin_public, 'register_subscriber');
+
+		$this->loader->add_filter('cron_schedules', $plugin_public, 'my_cron_schedules');
+		$this->loader->add_action('init', $plugin_public, 'schedule_email');
+		$this->loader->add_action('send_email_cron_hook', $plugin_public, 'send_mail');
 	}
 
 	/**
@@ -180,7 +199,8 @@ class Subscribe_Me {
 	 *
 	 * @since    1.0.0
 	 */
-	public function run() {
+	public function run()
+	{
 		$this->loader->run();
 	}
 
@@ -191,7 +211,8 @@ class Subscribe_Me {
 	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
 	 */
-	public function get_plugin_name() {
+	public function get_plugin_name()
+	{
 		return $this->plugin_name;
 	}
 
@@ -201,7 +222,8 @@ class Subscribe_Me {
 	 * @since     1.0.0
 	 * @return    Subscribe_Me_Loader    Orchestrates the hooks of the plugin.
 	 */
-	public function get_loader() {
+	public function get_loader()
+	{
 		return $this->loader;
 	}
 
@@ -211,8 +233,8 @@ class Subscribe_Me {
 	 * @since     1.0.0
 	 * @return    string    The version number of the plugin.
 	 */
-	public function get_version() {
+	public function get_version()
+	{
 		return $this->version;
 	}
-
 }
